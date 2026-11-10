@@ -8,10 +8,13 @@ Requires Node 22+: `npm ci`, then `npm run dev`. Run `npm test` and `npm run bui
 
 ## GitHub Pages
 
-1. Put the contents of this folder at the root of your GitHub repository and commit the lockfile.
-2. In **Settings → Pages → Build and deployment → Source**, choose **GitHub Actions**.
-3. Push to `main`. The included workflow tests, builds, uploads `dist`, and deploys Pages automatically. Enable Actions if the repository has disabled them.
-4. Visit the URL shown by the deployment job. On Android use the browser's Install app menu. On iPad use Safari → Share → Add to Home Screen.
+The deployment workflow is already included. In **Settings → Pages**, set **Source** to **GitHub Actions**. Do not configure the suggested Jekyll or Static HTML templates.
+
+To deploy now, open **Actions → Deploy to GitHub Pages → Run workflow**, choose **main**, and run it. Future pushes to `main` deploy automatically.
+
+See the [step-by-step GitHub Pages setup and troubleshooting guide](docs/github-pages.md) for Pages settings guidance, permissions, installation, and saved-data behavior.
+
+Expected site address after a successful deployment: https://glbookshare.github.io/levinsandbox/
 
 The workflow reads the repository base path from `configure-pages`. For a manual project build use `VITE_BASE_PATH=/your-repository/ npm run build`. Default `/` supports local development or a custom-domain root. Vite asset URLs, manifest scope/start URL, icons and service worker use this base. Do not move an installed app to a different origin: browser storage belongs to the origin.
 
