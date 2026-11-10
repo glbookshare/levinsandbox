@@ -8,6 +8,9 @@ export const german: Record<string,string> = {
   "What will you make?": "Was baust du heute?",
   "Shapes": "Formen",
   "More soon": "Bald mehr",
+  "Human": "Mensch",
+  "Tap a toy button to add it. Then drag the toy to move it.": "Tippe auf eine Spielzeugtaste, um es hinzuzufügen. Ziehe dann das Spielzeug, um es zu bewegen.",
+  "Tap a toy button to add it. Drag toys to explore.": "Tippe auf eine Spielzeugtaste. Ziehe Spielzeuge zum Bewegen.",
   "Box": "Kiste",
   "Ball": "Ball",
   "Plank": "Brett",
@@ -96,6 +99,6 @@ export function setLanguage(next: Language, root: HTMLElement) {
  root.querySelectorAll('[aria-label]').forEach(el=>{const original=sourceLabels.get(el);if(original)el.setAttribute('aria-label',t(original));});
 }
 export function addHint(kind: string): string {
- const names: Record<string,string> = {box:'eine Kiste',ball:'einen Ball',plank:'ein Brett',ramp:'eine Rampe',platform:'eine Plattform',wheel:'ein Rad'};
+ const names: Record<string,string> = {box:'eine Kiste',ball:'einen Ball',plank:'ein Brett',ramp:'eine Rampe',platform:'eine Plattform',wheel:'ein Rad',human:'eine Figur'};
  return language === 'de' ? `Tippe auf den Spielplatz, um ${names[kind]} hinzuzufügen.` : `Tap the playground to add a ${kind}`;
 }

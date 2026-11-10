@@ -7,3 +7,9 @@ describe('versioned world schema',()=>{
  it('rejects unknown versions without mutating data',()=>{expect(()=>decode({...world,version:2})).toThrow();expect(world.version).toBe(1);});
  it('rejects corrupt data and duplicate identities',()=>{expect(()=>decode({...world,items:[{...world.items[0],x:NaN}]})).toThrow();expect(()=>decode({...world,items:[world.items[0],world.items[0]]})).toThrow();});
 });
+
+it('rejects incomplete or corrupt articulated poses',()=>{
+ const human={...world.items[0],kind:'human',parts:[{x:1,y:2,angle:0,vx:0,vy:0,av:0}]};
+ expect(()=>decode({...world,items:[human]})).toThrow('Invalid human');
+ expect(()=>decode({...world,items:[{...human,parts:Array.from({length:5},()=>({...human.parts[0],vx:Infinity}))}]})).toThrow('Invalid human');
+});
