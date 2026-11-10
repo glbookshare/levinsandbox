@@ -56,3 +56,11 @@ The configurable base keeps scripts, styles, icons, the PWA manifest and service
 Open the deployed HTTPS address online and wait for the offline-ready message. On Android Chrome, use **Install app** (or **Add to Home screen**); on iPad Safari, use **Share → Add to Home Screen**. Menu wording varies by browser version.
 
 World snapshots and the language preference are stored in IndexedDB on the device. Ordinary code updates and service worker cache replacement do not delete IndexedDB. Changing the domain, clearing browser site data, browser eviction, or some uninstall options can make saves unavailable. There is no server copy of local saves in Phase 1.
+
+## GitHub Actions Node.js runtime warnings
+
+The runtime that executes an action is separate from the Node version installed for `npm ci`, tests and the Vite build. Changing `node-version` alone does not fix a warning about an action using deprecated Node 20.
+
+The workflow uses Node 24 action releases: `checkout@v7`, `setup-node@v7`, `configure-pages@v6`, `upload-pages-artifact@v5`, and `deploy-pages@v5`. The Pages upload action also uses a Node 24 version of `upload-artifact` internally. The application build continues to use Node 22.
+
+After updating action versions, use the new run triggered by the commit on `main`. Re-running an older workflow run uses its original workflow and can still show the old warning. No Pages settings change is needed.
