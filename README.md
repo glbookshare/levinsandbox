@@ -43,3 +43,9 @@ This deliverable intentionally implements Phase 1 plus a friendly articulated hu
 ## Languages
 
 Use the header language selector for English or Deutsch. On the first visit, the app uses German when the browser's primary language is German, otherwise English. The choice is saved in the IndexedDB `preferences` store, separately from playground data. Changing language translates controls, accessibility labels, help, hints and notifications without restarting physics. The Pocket Physics brand and saved world data remain unchanged. Both language packs are bundled for offline use.
+
+## Startup regression check
+
+`src/app.test.ts` boots the real Phaser Canvas renderer and Matter physics in a simulated DOM with a native canvas implementation, then clicks all seven HTML toy buttons and checks that each adds and selects an object. It also waits for rendered game frames. Only service-worker registration and storage are mocked in that test. This covers initialization and DOM handler wiring that the smaller physics tests cannot cover. Physical browser and tablet testing is still required.
+
+Game controls are disabled during scene creation and saved-world loading. Lifecycle callbacks and DOM handlers are attached before Phaser starts, so early startup cannot skip button registration or overwrite a new toy with a late save load.

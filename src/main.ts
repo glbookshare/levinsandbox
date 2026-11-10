@@ -28,14 +28,16 @@ document.querySelector<HTMLSelectElement>('#language')!.onchange=async e=>{
  try{await saveLanguage(value);}catch{toast(t('Your language choice could not be saved.'));}
 };
 void loadLanguage().then(value=>{if(value&&!languageChanged){setLanguage(value,app);refreshLanguage();}}).catch(()=>{});
-new Phaser.Game({type:Phaser.AUTO,parent:'game',backgroundColor:'#eff4ec',scale:{mode:Phaser.Scale.RESIZE,width:800,height:600},physics:{default:'matter',matter:{gravity:{x:0,y:1},enableSleeping:true}},scene:[scene],render:{antialias:true},input:{activePointers:3}});
+
 export function toast(message:string){const t=document.querySelector('#toast')!;t.textContent=message;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
 let timer:ReturnType<typeof setTimeout>;let ready=false;let dirty=false;
 export function changed(){dirty=true;clearTimeout(timer);timer=setTimeout(checkpoint,1000);}
 async function checkpoint(){if(!ready||!dirty)return;try{await save(scene.snapshot());dirty=false;storageUnavailable=false;document.querySelector('#storage')!.textContent=t("Saved on this device");}catch{storageUnavailable=true;document.querySelector('#storage')!.textContent=t("Storage unavailable");toast(t("Device storage is unavailable. This playground cannot be saved."));}}
-scene.events.once('ready',async()=>{try{const w=await load();if(w)scene.restore(w);}catch{toast(t("Saved playground could not be opened. Storage may be unavailable."));}ready=true;});
+const gameControls=document.querySelectorAll<HTMLButtonElement|HTMLSelectElement>('[data-kind], .tools button, .zoom button, .play-controls button, #gravity');
+gameControls.forEach(control=>control.disabled=true);
+scene.onReady=async()=>{try{const w=await load();if(w)scene.restore(w);}catch{toast(t("Saved playground could not be opened. Storage may be unavailable."));}finally{ready=true;gameControls.forEach(control=>control.disabled=false);}};
 setInterval(()=>{if(ready){dirty=true;void checkpoint();}},10000);
-document.querySelectorAll<HTMLButtonElement>('[data-kind]').forEach(b=>b.onclick=()=>{if(!scene.sys.isActive())return;scene.addToy(b.dataset.kind as import('./world').Kind);});
+document.querySelectorAll<HTMLButtonElement>('[data-kind]').forEach(b=>b.onclick=()=>{if(!ready)return;scene.addToy(b.dataset.kind as import('./world').Kind);});
 const on=(id:string,fn:()=>void)=>document.getElementById(id)!.onclick=fn;
 on('play',()=>{scene.paused=!scene.paused;scene.syncPause();document.querySelector('#play')!.innerHTML=scene.paused?'▶ <span>'+t('Play')+'</span>':'Ⅱ <span>'+t('Pause')+'</span>';document.querySelector('#mode-label')!.textContent=scene.paused?t("Ready to build"):t("Physics is playing");});
 on('slow',()=>{scene.slow=!scene.slow;scene.syncPause();document.querySelector('#slow')!.classList.toggle('enabled',scene.slow);});
@@ -46,3 +48,6 @@ on('help',()=>document.querySelector<HTMLDialogElement>('dialog')!.showModal());
 document.addEventListener('visibilitychange',()=>{scene.cancelGesture();scene.syncPause();if(document.hidden){dirty=true;void checkpoint();}});
 window.addEventListener('pagehide',()=>{dirty=true;void checkpoint();});
 registerSW({onOfflineReady(){toast(t("Ready for offline play!"));},onNeedRefresh(){toast(t("An update is ready. Close and reopen when you finish playing."));}});
+
+// Start Phaser only after lifecycle callbacks and UI handlers are attached.
+export const game=new Phaser.Game({type:Phaser.AUTO,parent:'game',backgroundColor:'#eff4ec',scale:{mode:Phaser.Scale.RESIZE,width:800,height:600},physics:{default:'matter',matter:{gravity:{x:0,y:1},enableSleeping:true}},scene:[scene],render:{antialias:true},input:{activePointers:3}});

@@ -7,6 +7,7 @@ type Body=MatterJS.BodyType;
 const colors:Record<Kind,number>={box:0xe8ac55,ball:0xec7c83,plank:0xdbb57b,ramp:0x8aa7d4,platform:0x79b99a,wheel:0x8e85bd,human:0x67ac9d};
 const sizes:Record<Kind,[number,number]>={box:[66,66],ball:[56,56],plank:[170,22],ramp:[130,80],platform:[160,24],wheel:[66,66],human:[36,50]};
 export class Playground extends Phaser.Scene{
+ onReady?:()=>void;
  humans=new Map<Body,Human>();
  objects:{body:Body;data:Item}[]=[];tool:Kind|'select'|'pan'='select';paused=false;slow=false;selected:Body|null=null;g!:Phaser.GameObjects.Graphics;bg!:Phaser.GameObjects.Graphics;
  points=new Map<number,{x:number;y:number}>();drag:Body|null=null;constraint:any=null;last:{x:number;y:number;distance:number}|null=null;rotateDrag=false;ground:Body|null=null;down={x:0,y:0};
@@ -15,7 +16,7 @@ export class Playground extends Phaser.Scene{
  const el=this.game.canvas;el.style.touchAction='none';
  el.addEventListener('pointerdown',this.pointerDown);el.addEventListener('pointermove',this.pointerMove);el.addEventListener('pointerup',this.pointerUp);el.addEventListener('pointercancel',()=>this.cancelGesture());el.addEventListener('lostpointercapture',()=>{if(!this.points.size)this.cancelGesture();});
  el.addEventListener('wheel',e=>{e.preventDefault();this.zoomBy(e.deltaY>0?.9:1.1);},{passive:false});
- this.events.emit('ready');}
+ this.onReady?.();}
  center(){const c=this.cameras.main;c.setZoom(Math.min(c.width/1100,c.height/640));c.centerOn(550,340);this.zoomLabel();}
  zoomLabel(){document.querySelector('#zoom-value')!.textContent=Math.round(this.cameras.main.zoom*100)+'%';}
  zoomBy(f:number){this.cameras.main.setZoom(Phaser.Math.Clamp(this.cameras.main.zoom*f,.25,2.5));this.zoomLabel();}
