@@ -21,7 +21,7 @@ it('adds each tray toy immediately in view and selects it',()=>{
 });
 it('restores articulated figure poses and removes every joint and body',()=>{
  scene.addToy('human');const human=scene.humans.get(scene.selected!)!;
- expect(human.parts).toHaveLength(5);expect(human.joints).toHaveLength(5);
+ expect(human.parts).toHaveLength(5);expect(human.joints).toHaveLength(10);
  for(let i=0;i<30;i++)Engine.update(scene.matter.world.engine,1000/60);
  const saved=decode(JSON.parse(encode(scene.snapshot())));
  scene.restore(saved);expect(scene.snapshot()).toEqual(saved);
@@ -29,3 +29,46 @@ it('restores articulated figure poses and removes every joint and body',()=>{
  scene.removeSelected();expect(scene.objects).toHaveLength(0);expect(Composite.allBodies(scene.matter.world.engine.world)).toHaveLength(0);expect(Composite.allConstraints(scene.matter.world.engine.world)).toHaveLength(0);
 });
 it('counts figure parts toward the physics budget',()=>{for(let i=0;i<25;i++)scene.addToy('human');expect(scene.objects).toHaveLength(25);expect(scene.addToy('box')).toBeUndefined();});
+
+it('keeps a standing pose under gravity for ten seconds',()=>{
+ const torso=scene.spawn('human',400,300)!;
+ const human=scene.humans.get(torso)!;
+ scene.matter.add.rectangle(400,401,800,40,{isStatic:true,friction:.8});
+ for(let i=0;i<600;i++)Engine.update(scene.matter.world.engine,1000/60);
+ expect(Math.abs(torso.position.x-400)).toBeLessThan(10);
+ expect(Math.abs(torso.angle)).toBeLessThan(.15);
+ human.parts.forEach(b=>expect(Math.abs(b.angle-torso.angle)).toBeLessThan(.2));
+ expect(human.parts[0].position.y).toBeLessThan(torso.position.y-30);
+ expect(human.parts[3].position.y).toBeGreaterThan(torso.position.y+40);
+ expect(torso.isStatic).toBe(false);
+});
+it('responds to an object collision instead of freezing in place',()=>{
+ const torso=scene.spawn('human',400,300)!;
+ scene.matter.add.rectangle(400,401,800,40,{isStatic:true,friction:.8});
+ for(let i=0;i<120;i++)Engine.update(scene.matter.world.engine,1000/60);
+ const x=torso.position.x;
+ const ball=scene.spawn('ball',260,280)!;
+ Body.setVelocity(ball,{x:15,y:0});
+ for(let i=0;i<60;i++)Engine.update(scene.matter.world.engine,1000/60);
+ expect(Math.abs(torso.position.x-x)).toBeGreaterThan(10);
+ expect(scene.humans.get(torso)!.parts.every(b=>Number.isFinite(b.position.x)&&Number.isFinite(b.angle))).toBe(true);
+});
+
+it('lands upright after falling onto an empty floor',()=>{
+ const torso=scene.spawn('human',400,200)!;
+ scene.matter.add.rectangle(400,610,1000,40,{isStatic:true,friction:.8});
+ for(let i=0;i<600;i++)Engine.update(scene.matter.world.engine,1000/60);
+ expect(Math.abs(torso.angle)).toBeLessThan(.2);
+ const human=scene.humans.get(torso)!;
+ expect(human.parts[0].position.y).toBeLessThan(torso.position.y-30);
+ expect(human.parts[3].position.y).toBeGreaterThan(torso.position.y+40);
+});
+
+it('reconstructs pose attachments correctly for a rotated saved figure',()=>{
+ const torso=scene.spawn('human',400,200)!;scene.selected=torso;
+ scene.turnSelected(.7);scene.matter.world.setGravity(0,0);
+ const saved=decode(JSON.parse(encode(scene.snapshot())));scene.restore(saved);
+ for(let i=0;i<60;i++)Engine.update(scene.matter.world.engine,1000/60);
+ expect(scene.objects[0].body.angle).toBeCloseTo(.7,1);
+ scene.humans.get(scene.objects[0].body)!.parts.forEach((b,i)=>{expect(Math.abs(b.angle-saved.items[0].parts![i].angle)).toBeLessThan(.1);});
+});

@@ -9,9 +9,19 @@ export function createHuman(scene:Phaser.Scene,torso:Body,states?:Motion[]):Huma
  const {x,y}=torso.position;
  const opts={collisionFilter:{group},friction:.5,restitution:.05,density:.001,sleepThreshold:90};
  const parts=[scene.matter.add.circle(x,y-39,18,opts),scene.matter.add.rectangle(x-28,y,14,48,opts),scene.matter.add.rectangle(x+28,y,14,48,opts),scene.matter.add.rectangle(x-12,y+53,17,56,opts),scene.matter.add.rectangle(x+12,y+53,17,56,opts)];
- const anchors=[{a:{x:0,y:-22},b:{x:0,y:18}},{a:{x:-17,y:-19},b:{x:0,y:-20}},{a:{x:17,y:-19},b:{x:0,y:-20}},{a:{x:-12,y:25},b:{x:0,y:-27}},{a:{x:12,y:25},b:{x:0,y:-27}}];
- const joints=parts.map((part,i)=>scene.matter.add.constraint(torso,part,2,.85,{pointA:anchors[i].a,pointB:anchors[i].b,damping:.15}));
+ const anchors=[{a:{x:0,y:-22},b:{x:0,y:18}},{a:{x:-17,y:-19},b:{x:11,y:-20}},{a:{x:17,y:-19},b:{x:-11,y:-20}},{a:{x:-12,y:25},b:{x:0,y:-27}},{a:{x:12,y:25},b:{x:0,y:-27}}];
+ // Restore the pose before measuring the braces, so saved poses stay intact.
  parts.forEach((b,i)=>{const s=states?.[i];if(s){scene.matter.body.setPosition(b,{x:s.x,y:s.y});scene.matter.body.setAngle(b,s.angle);scene.matter.body.setVelocity(b,{x:s.vx,y:s.vy});scene.matter.body.setAngularVelocity(b,s.av);}});
+ const offset=(body:Body,p:{x:number;y:number})=>({x:p.x*Math.cos(body.angle)-p.y*Math.sin(body.angle),y:p.x*Math.sin(body.angle)+p.y*Math.cos(body.angle)});
+ const joints=parts.map((part,i)=>scene.matter.add.constraint(torso,part,1,.9,{pointA:offset(torso,anchors[i].a),pointB:offset(part,anchors[i].b),damping:.15}));
+ // A second, offset attachment resists rotation at each joint. Unlike a single
+ // pin, the pair holds posture under gravity while remaining dynamic springs.
+ const braceAnchors=anchors.map(({a,b},i)=>{const shift=i===1||i===3?-18:18;return{a:{x:a.x+shift,y:a.y},b:{x:b.x+shift,y:b.y}};});
+ const worldPoint=(body:Body,p:{x:number;y:number})=>({x:body.position.x+p.x*Math.cos(body.angle)-p.y*Math.sin(body.angle),y:body.position.y+p.x*Math.sin(body.angle)+p.y*Math.cos(body.angle)});
+ for(let i=0;i<parts.length;i++){
+  const {a,b}=braceAnchors[i];const pa=worldPoint(torso,a),pb=worldPoint(parts[i],b);
+  joints.push(scene.matter.add.constraint(torso,parts[i],Math.hypot(pb.x-pa.x,pb.y-pa.y),.9,{pointA:offset(torso,a),pointB:offset(parts[i],b),damping:.2}));
+ }
  return{parts,joints};
 }
 export function drawHuman(g:Phaser.GameObjects.Graphics,torso:Body,human:Human){

@@ -34,7 +34,7 @@ The scene caps physics bodies at 150 (a human uses six bodies), enables Matter s
 - `src/main.ts`, `src/style.css`: responsive interface and app lifecycle.
 - `vite.config.ts`: base-aware PWA generation and offline cache.
 
-The friendly human toy is available now: a smiling head, torso, arms and legs with permanent physics joints. Select any part to move, rotate or delete the whole figure. All parts’ positions, rotations and velocities are saved; older shape-only saves still load.
+The friendly human toy is available now: a smiling head, torso, arms and legs with permanent physics joints and paired spring attachments that hold its posture under gravity. It can stand on a level floor and remains dynamic when struck or pushed. Select any part to move, rotate or delete the whole figure. All parts’ positions, rotations and velocities are saved; older shape-only saves still load.
 
 Phase 2 remaining: ropes, springs, hinges, motors, explicit build/play modes and undo/redo. Phase 3: named multi-world library, manual save/load, JSON import/export, preferences/progress, expanded migration and persistence tests. Phase 4: mechanisms, challenges, rendering/performance profiling and device polish.
 
