@@ -13,3 +13,8 @@ it('rejects incomplete or corrupt articulated poses',()=>{
  expect(()=>decode({...world,items:[human]})).toThrow('Invalid human');
  expect(()=>decode({...world,items:[{...human,parts:Array.from({length:5},()=>({...human.parts[0],vx:Infinity}))}]})).toThrow('Invalid human');
 });
+
+it('round trips toy bombs without persisting a pending long press',()=>{
+ const w:World={...world,items:[{...world.items[0],kind:'bomb'}]};
+ expect(decode(JSON.parse(encode(w)))).toEqual(w);
+});

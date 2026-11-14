@@ -37,7 +37,7 @@ it('boots real Phaser, adds toys by mouse and handles Safari touch zoom',async()
   document.querySelector<HTMLButtonElement>('#close-toys')!.click();
   const before=scene.objects.length;
   const buttons=Array.from(document.querySelectorAll<HTMLButtonElement>('[data-kind]'));
-  expect(buttons).toHaveLength(7);
+  expect(buttons).toHaveLength(8);
   buttons.forEach((button,i)=>{
    document.querySelector<HTMLButtonElement>('#toggle-toys')!.click();
    expect(document.querySelector<HTMLElement>('#toy-panel')!.hidden).toBe(false);
@@ -94,5 +94,31 @@ it('boots real Phaser, adds toys by mouse and handles Safari touch zoom',async()
   const resizedZoom=camera.zoom;scene.scale.emit('resize',scene.scale.gameSize,scene.scale.baseSize,scene.scale.displaySize,scene.scale.width,scene.scale.height);expect(camera.zoom).toBe(resizedZoom);
   const wheel=new WheelEvent('wheel',{deltaY:-50,cancelable:true});
   camera.setZoom(1);canvas.dispatchEvent(wheel);expect(camera.zoom).toBeCloseTo(1.1);expect(wheel.defaultPrevented).toBe(true);
+
+  // Hold via Safari's real DOM path: releases and pinches must cancel, not explode later.
+  camera.preRender();const bombPoint=camera.getWorldPoint(300,200);
+  const bomb=scene.spawn('bomb',bombPoint.x,bombPoint.y)!;
+  touch('touchstart',[p(9,300,200)]);
+  expect(scene.bombHold.active?.body).toBe(bomb);
+  scene.updateBombs(scene.bombHold.active!.started+3000);
+  expect(scene.objects.some(o=>o.body===bomb)).toBe(true);
+  touch('touchend',[p(9,300,200)]);scene.updateBombs(performance.now()+5000);
+  expect(scene.objects.some(o=>o.body===bomb)).toBe(true);
+  touch('touchstart',[p(9,300,200)]);touch('touchstart',[p(10,500,200)]);
+  expect(scene.bombHold.active).toBeNull();
+  touch('touchend',[p(9,300,200),p(10,500,200)]);
+  touch('touchstart',[p(9,300,200)]);touch('touchmove',[p(9,325,200)]);
+  expect(scene.bombHold.active).toBeNull();touch('touchend',[p(9,325,200)]);
+  // Return the dragged bomb to its initial position before a stationary hold.
+  scene.matter.body.setPosition(bomb,bombPoint);
+  touch('touchstart',[p(9,300,200)]);
+  scene.bombHold.active!.started=performance.now()-3001;
+  const countBeforePop=scene.objects.length;
+  scene.updateBombs(performance.now());
+  expect(scene.objects.some(o=>o.body===bomb)).toBe(false);
+  expect(scene.objects.length).toBe(countBeforePop-1);expect(scene.humans.size).toBe(1);
+  expect(scene.pops).toHaveLength(1);expect(scene.bombHold.active).toBeNull();
+  touch('touchend',[p(9,300,200)]);
+  scene.update();expect(errors).toEqual([]);
  }finally{scene.game?.destroy(true);vi.unstubAllGlobals();}
 },10000);

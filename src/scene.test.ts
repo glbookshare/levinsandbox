@@ -16,8 +16,8 @@ beforeEach(()=>{
  (scene as any).cameras={main:{width:800,height:600,getWorldPoint:(x:number,y:number)=>({x,y})}};
 });
 it('adds each tray toy immediately in view and selects it',()=>{
- for(const kind of ['box','ball','plank','ramp','platform','wheel','human'] as Kind[]){const b=scene.addToy(kind)!;expect(b).toBeTruthy();expect(scene.selected).toBe(b);expect(b.position.x).toBeCloseTo(400);expect(b.position.y).toBeCloseTo(210);expect(scene.tool).toBe('select');}
- expect(scene.objects.length).toBe(7);
+ for(const kind of ['box','ball','plank','ramp','platform','wheel','human','bomb'] as Kind[]){const b=scene.addToy(kind)!;expect(b).toBeTruthy();expect(scene.selected).toBe(b);expect(b.position.x).toBeCloseTo(400);expect(b.position.y).toBeCloseTo(210);expect(scene.tool).toBe('select');}
+ expect(scene.objects.length).toBe(8);
 });
 it('restores articulated figure poses and removes every joint and body',()=>{
  scene.addToy('human');const human=scene.humans.get(scene.selected!)!;

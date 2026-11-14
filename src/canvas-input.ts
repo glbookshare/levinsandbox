@@ -26,6 +26,7 @@ export function bindCanvasInput(canvas:HTMLCanvasElement,handlers:Handlers):()=>
  }
  on('touchcancel',event=>{if(event.cancelable)event.preventDefault();event.stopPropagation();handlers.cancel();},{passive:false,capture:true});
  for(const type of ['gesturestart','gesturechange','gestureend'])on(type,event=>{if(event.cancelable)event.preventDefault();},{passive:false,capture:true});
+ on('contextmenu',event=>event.preventDefault(),{passive:false});
  on('wheel',event=>handlers.wheel(event as WheelEvent),{passive:false});
  window.addEventListener('blur',handlers.cancel);
  dispose.push(()=>window.removeEventListener('blur',handlers.cancel));

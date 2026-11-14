@@ -10,6 +10,7 @@ bindOverlayControls();
 const app = document.querySelector<HTMLElement>('#app')!;
 captureTranslations(app);
 export const scene=new Playground();
+for(const type of ['pointerdown','touchstart'])document.querySelector('.hud')!.addEventListener(type,()=>scene.cancelGesture(),{capture:true,passive:true});
 let storageUnavailable=false;
 function refreshLanguage(){
  setLanguage(getLanguage(),app);

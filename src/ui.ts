@@ -1,5 +1,5 @@
 import {t} from './i18n';
-const icons:Record<string,string>={box:'▣',ball:'●',plank:'▬',ramp:'◩',platform:'▰',wheel:'◉',human:'♟'};
+const icons:Record<string,string>={box:'▣',ball:'●',plank:'▬',ramp:'◩',platform:'▰',wheel:'◉',human:'♟',bomb:'✹'};
 export function createUI(){
  document.querySelector('#app')!.innerHTML=`
  <main class="playground" aria-label="Physics playground">
@@ -15,7 +15,7 @@ export function createUI(){
    </div>
    <section id="toy-panel" class="panel glass" data-hud aria-labelledby="toy-heading" hidden>
     <div class="panel-heading"><h2 id="toy-heading">TOY BOX</h2><button id="close-toys" class="icon-button" aria-label="Close toy box">×</button></div>
-    <div class="toys">${Object.entries(icons).map(([kind,icon])=>`<button class="toy ${kind}" data-kind="${kind}"><span aria-hidden="true">${icon}</span><b>${kind[0].toUpperCase()+kind.slice(1)}</b></button>`).join('')}</div>
+    <div class="toys">${Object.entries(icons).map(([kind,icon])=>`<button class="toy ${kind}" data-kind="${kind}"><span aria-hidden="true">${icon}</span><b>${kind==='bomb'?'Confetti bomb':kind[0].toUpperCase()+kind.slice(1)}</b></button>`).join('')}</div>
    </section>
    <section id="settings-panel" class="panel glass" data-hud aria-labelledby="settings-heading" hidden>
     <div class="panel-heading"><h2 id="settings-heading">Settings</h2><button id="close-settings" class="icon-button" aria-label="Close settings">×</button></div>
@@ -43,7 +43,7 @@ export function createUI(){
    <div class="hint" id="hint" data-dynamic data-hud>Tap a toy button to add it. Drag toys to explore.</div>
   </div>
  </main>
- <dialog id="help-dialog" aria-labelledby="help-heading"><button id="close-help" class="icon-button" aria-label="Close help">×</button><h2 id="help-heading">Hello, little inventor! ✳</h2><p>Open Toys to add something. Open Settings for gravity, language and help.</p><p>Use the hide-controls button for an unobstructed view. Tap it again to bring the controls back.</p><p>Tap a toy button to add it. Then drag the toy to move it.</p><p>Drag toys to move them. Use two fingers to pan and pinch to zoom. On a computer, use the pan tool and mouse wheel.</p><p>Tap a toy to select it. Use ↻ to turn it, or ⌫ to remove it. Pause for precise placement.</p></dialog>
+ <dialog id="help-dialog" aria-labelledby="help-heading"><button id="close-help" class="icon-button" aria-label="Close help">×</button><h2 id="help-heading">Hello, little inventor! ✳</h2><p>Open Toys to add something. Open Settings for gravity, language and help.</p><p>Use the hide-controls button for an unobstructed view. Tap it again to bring the controls back.</p><p>Tap a toy button to add it. Then drag the toy to move it.</p><p>Drag toys to move them. Use two fingers to pan and pinch to zoom. On a computer, use the pan tool and mouse wheel.</p><p>Hold a confetti bomb still for more than 3 seconds to pop it. Lift your finger to cancel.</p><p>Tap a toy to select it. Use ↻ to turn it, or ⌫ to remove it. Pause for precise placement.</p></dialog>
  <div id="toast" role="status"></div>`;
 }
 export function closePanels(){

@@ -46,7 +46,7 @@ Open the floating **Settings** panel and use the language selector for English o
 
 ## Startup regression check
 
-`src/app.test.ts` boots the real Phaser Canvas renderer and Matter physics in a simulated DOM with a native canvas implementation, then clicks all seven HTML toy buttons and checks that each adds and selects an object. It also waits for rendered game frames. Only service-worker registration and storage are mocked in that test. This covers initialization and DOM handler wiring that the smaller physics tests cannot cover. Physical browser and tablet testing is still required.
+`src/app.test.ts` boots the real Phaser Canvas renderer and Matter physics in a simulated DOM with a native canvas implementation, then clicks all eight HTML toy buttons and checks that each adds and selects an object. It also waits for rendered game frames. Only service-worker registration and storage are mocked in that test. This covers initialization and DOM handler wiring that the smaller physics tests cannot cover. Physical browser and tablet testing is still required.
 
 Game controls are disabled during scene creation and saved-world loading. Lifecycle callbacks and DOM handlers are attached before Phaser starts, so early startup cannot skip button registration or overwrite a new toy with a late save load.
 
@@ -68,3 +68,9 @@ The canvas fills the available viewport in both orientations; no header, footer 
 - The top-right expand-view button hides the controls. One restore button remains; tap it to show them again. This changes only the interface, not the world, physics state or zoom.
 
 Panels scroll on smaller screens, while unused overlay space lets touches pass through to the game. Pinch-to-zoom remains available with controls visible or hidden. The app boot regression test covers opening/closing panels, toy insertion, gravity changes, hiding/restoring controls and Safari touch zoom. Visual verification on physical iPads remains recommended.
+
+## Confetti bomb
+
+The toy palette includes a colorful confetti bomb (Konfettibombe). Hold it still with one finger or the mouse for **more than three seconds**. A progress ring fills as you hold. Releasing, dragging more than 12 screen pixels, adding a second finger, opening an overlay, losing focus, backgrounding, deleting or resetting cancels the hold. Short taps never accumulate.
+
+The bomb pops once and disappears, producing a brief confetti effect and a bounded, distance- and mass-dependent impulse on nearby dynamic objects. Static platforms stay fixed, friendly figures remain intact, and other bombs do not trigger automatically. In Pause mode the pop works, but pushed toys move when physics resumes. The effect adds no physics bodies, and at most four visual pops are kept at once. Bombs and post-pop velocities are saved normally; an in-progress finger hold is never saved or resumed.

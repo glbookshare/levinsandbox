@@ -23,3 +23,7 @@ dialog{border:1px solid #d5dfcf;border-radius:22px;max-width:min(440px,calc(100v
 @media(max-width:640px){.brand-icon{display:none}.brand{padding:8px;gap:7px}.brand b{font-size:14px}.brand-icon{width:30px;height:30px;font-size:29px;line-height:30px}.brand #mode-label{max-width:110px;font-size:8px}.top-actions{gap:6px}.action{padding:0 11px}.action-text{display:none}.play-controls{left:var(--left);transform:none}.zoom>span{display:none}.zoom .icon-button{width:44px;min-width:44px}.object-count{bottom:calc(var(--bottom) + 77px)}.hint{display:none}.top-bar{gap:6px}.panel{width:248px}.tools{padding:4px;gap:0}.tools .icon-button{min-width:44px;width:44px;height:44px;min-height:44px}}
 @media(max-width:380px){.brand #mode-label{display:none}.brand{background:none;border:0;box-shadow:none;padding:8px 0}.brand b{font-size:12px}.brand-icon{display:none}.action{font-size:11px;padding:0 9px}.top-actions>.icon-button{width:48px;min-width:48px}}
 @media(max-height:480px){.tools{top:calc(var(--top) + 58px);transform:none;flex-direction:row}.tools .divider{width:1px;height:30px;margin:7px 3px}.brand #mode-label{display:none}.top-actions .action,.top-actions>.icon-button{min-height:44px;height:44px}.panel{top:calc(var(--top) + 54px);max-height:calc(100% - var(--top) - var(--bottom) - 130px)}.toy{min-height:60px;flex-direction:row;gap:8px}.toy span{font-size:25px}.tools{gap:0}.tools .icon-button{min-height:44px;height:44px}.hint{display:none}}
+
+.bomb span{color:#997ac6}
+
+canvas{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
