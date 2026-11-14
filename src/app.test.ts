@@ -22,10 +22,41 @@ it('boots real Phaser, adds toys by mouse and handles Safari touch zoom',async()
  const {scene}=await import('./main');
  try{
   await vi.waitFor(()=>{expect(errors).toEqual([]);expect(scene.sys.isActive()).toBe(true);expect(document.querySelector<HTMLButtonElement>('[data-kind="box"]')!.disabled).toBe(false);},{timeout:5000});
+  const canvasHost=document.querySelector('#game')!;
+  const hud=document.querySelector('.hud')!;
+  expect(canvasHost.parentElement).toBe(hud.parentElement);
+  expect(document.querySelector('#settings-panel')!.getAttribute('hidden')).not.toBeNull();
+  document.querySelector<HTMLButtonElement>('#toggle-settings')!.click();
+  expect(document.querySelector<HTMLElement>('#settings-panel')!.hidden).toBe(false);
+  const gravity=document.querySelector<HTMLSelectElement>('#gravity')!;
+  gravity.value='0.17';gravity.dispatchEvent(new Event('change'));
+  expect(scene.snapshot().gravity).toBe(.17);gravity.value='1';gravity.dispatchEvent(new Event('change'));
+  document.querySelector<HTMLButtonElement>('#toggle-toys')!.click();
+  expect(document.querySelector<HTMLElement>('#settings-panel')!.hidden).toBe(true);
+  expect(document.querySelector<HTMLElement>('#toy-panel')!.hidden).toBe(false);
+  document.querySelector<HTMLButtonElement>('#close-toys')!.click();
   const before=scene.objects.length;
   const buttons=Array.from(document.querySelectorAll<HTMLButtonElement>('[data-kind]'));
   expect(buttons).toHaveLength(7);
-  buttons.forEach((button,i)=>{button.click();expect(scene.objects.length).toBe(before+i+1);expect(scene.selected).toBe(scene.objects.at(-1)!.body);});
+  buttons.forEach((button,i)=>{
+   document.querySelector<HTMLButtonElement>('#toggle-toys')!.click();
+   expect(document.querySelector<HTMLElement>('#toy-panel')!.hidden).toBe(false);
+   button.click();expect(scene.objects.length).toBe(before+i+1);expect(scene.selected).toBe(scene.objects.at(-1)!.body);
+   expect(document.querySelector<HTMLElement>('#toy-panel')!.hidden).toBe(true);
+  });
+  const visibility=document.querySelector<HTMLButtonElement>('#toggle-hud')!;
+  document.querySelector<HTMLButtonElement>('#toggle-settings')!.click();
+  const language=document.querySelector<HTMLSelectElement>('#language')!;
+  language.value='de';language.dispatchEvent(new Event('change'));
+  expect(document.querySelector('#settings-heading')!.textContent).toBe('Einstellungen');
+  const objectCount=scene.objects.length,zoomBefore=scene.cameras.main.zoom;
+  const cameraSize=[scene.cameras.main.width,scene.cameras.main.height];
+  visibility.click();expect(hud.classList.contains('hud-hidden')).toBe(true);expect(visibility.getAttribute('aria-pressed')).toBe('true');
+  expect(visibility.getAttribute('aria-label')).toBe('Bedienelemente einblenden');
+  visibility.click();expect(hud.classList.contains('hud-hidden')).toBe(false);
+  expect([scene.cameras.main.width,scene.cameras.main.height]).toEqual(cameraSize);
+  language.value='en';language.dispatchEvent(new Event('change'));
+  expect(scene.objects.length).toBe(objectCount);expect(scene.cameras.main.zoom).toBe(zoomBefore);
   expect(scene.humans.size).toBe(1);
   await vi.waitFor(()=>{expect(errors).toEqual([]);expect(scene.game.loop.frame).toBeGreaterThan(4);});
 
@@ -38,7 +69,9 @@ it('boots real Phaser, adds toys by mouse and handles Safari touch zoom',async()
    canvas.dispatchEvent(event);return event;
   };
   const p=(identifier:number,clientX:number,clientY:number)=>({identifier,clientX,clientY});
+  document.querySelector<HTMLButtonElement>('#toggle-settings')!.click();
   const start=touch('touchstart',[p(1,300,250),p(2,500,250)]);
+  expect(document.querySelector<HTMLElement>('#settings-panel')!.hidden).toBe(true);
   expect(start.defaultPrevented).toBe(true);expect(scene.points.size).toBe(2);
   expect(scene.drag).toBeNull();expect(scene.rotateDrag).toBe(false);
   camera.preRender();const anchor=camera.getWorldPoint(400,250),zoom=camera.zoom;

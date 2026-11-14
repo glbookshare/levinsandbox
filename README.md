@@ -42,7 +42,7 @@ This deliverable intentionally implements Phase 1 plus a friendly articulated hu
 
 ## Languages
 
-Use the header language selector for English or Deutsch. On the first visit, the app uses German when the browser's primary language is German, otherwise English. The choice is saved in the IndexedDB `preferences` store, separately from playground data. Changing language translates controls, accessibility labels, help, hints and notifications without restarting physics. The Pocket Physics brand and saved world data remain unchanged. Both language packs are bundled for offline use.
+Open the floating **Settings** panel and use the language selector for English or Deutsch. On the first visit, the app uses German when the browser's primary language is German, otherwise English. The choice is saved in the IndexedDB `preferences` store, separately from playground data. Changing language translates controls, accessibility labels, help, hints and notifications without restarting physics. The Pocket Physics brand and saved world data remain unchanged. Both language packs are bundled for offline use.
 
 ## Startup regression check
 
@@ -57,3 +57,14 @@ On the playground, spread two fingers apart to zoom in, pinch them together to z
 Automated checks exercise native touch events against the real Phaser camera: pinch in/out, focal-point stability, two-finger pan, cancellation, the transition back to one finger, duplicate touch Pointer Events, and mouse-wheel zoom. These checks simulate Safari's event path; they do not replace a physical iPad test.
 
 For an iPad release check, open the deployed game in Safari and from its Home Screen icon; try pinching both on empty space and over a toy, moving both fingers, lifting one finger first, then starting a new one-finger drag. Confirm that the game zooms rather than the whole page, that a toy does not jump when a finger lifts, and that rotation/backgrounding leaves no stuck drag. After an update, close every open game tab/app window and reopen online to activate the new service worker without clearing saved worlds.
+
+## Full-screen playground and floating controls
+
+The canvas fills the available viewport in both orientations; no header, footer or sidebar takes space away from the world. All controls are overlays with at least 44px touch targets and iPad safe-area spacing:
+
+- **Toys** opens the toy palette. Choosing a toy adds it and closes the palette.
+- **Settings** opens gravity, language, help, reset and local-save status. Only one panel opens at a time; tap the playground or the panel’s × to close it.
+- Object selection, pan, rotation and delete float at the left edge. Playback controls sit at the bottom, and zoom controls at the bottom right.
+- The top-right expand-view button hides the controls. One restore button remains; tap it to show them again. This changes only the interface, not the world, physics state or zoom.
+
+Panels scroll on smaller screens, while unused overlay space lets touches pass through to the game. Pinch-to-zoom remains available with controls visible or hidden. The app boot regression test covers opening/closing panels, toy insertion, gravity changes, hiding/restoring controls and Safari touch zoom. Visual verification on physical iPads remains recommended.
