@@ -3,7 +3,7 @@ import {it,expect,vi} from 'vitest';
 import {createCanvas,Image,type Canvas} from '@napi-rs/canvas';
 vi.mock('virtual:pwa-register',()=>({registerSW:vi.fn()}));
 vi.mock('./storage',()=>({load:async()=>null,save:async()=>{},loadLanguage:async()=>null,saveLanguage:async()=>{}}));
-it('boots real Phaser and adds toys through mouse clicks on the HTML tray',async()=>{
+it('boots real Phaser, adds toys by mouse and handles Safari touch zoom',async()=>{
  const canvases=new WeakMap<HTMLCanvasElement,Canvas>();
  vi.stubGlobal('Image',Image);
  (window as any).CanvasRenderingContext2D=class {};
@@ -28,5 +28,38 @@ it('boots real Phaser and adds toys through mouse clicks on the HTML tray',async
   buttons.forEach((button,i)=>{button.click();expect(scene.objects.length).toBe(before+i+1);expect(scene.selected).toBe(scene.objects.at(-1)!.body);});
   expect(scene.humans.size).toBe(1);
   await vi.waitFor(()=>{expect(errors).toEqual([]);expect(scene.game.loop.frame).toBeGreaterThan(4);});
+
+  // iPad/Safari emits native Touch Events; exercise the actual registered DOM listeners.
+  scene.paused=true;scene.syncPause();
+  const canvas=scene.game.canvas,camera=scene.cameras.main;
+  const touch=(type:string,points:{identifier:number;clientX:number;clientY:number}[])=>{
+   const event=new Event(type,{bubbles:true,cancelable:true});
+   Object.defineProperty(event,'changedTouches',{value:points});
+   canvas.dispatchEvent(event);return event;
+  };
+  const p=(identifier:number,clientX:number,clientY:number)=>({identifier,clientX,clientY});
+  const start=touch('touchstart',[p(1,300,250),p(2,500,250)]);
+  expect(start.defaultPrevented).toBe(true);expect(scene.points.size).toBe(2);
+  expect(scene.drag).toBeNull();expect(scene.rotateDrag).toBe(false);
+  camera.preRender();const anchor=camera.getWorldPoint(400,250),zoom=camera.zoom;
+  expect(touch('touchmove',[p(2,700,250)]).defaultPrevented).toBe(true);
+  expect(camera.zoom).toBeCloseTo(Math.min(2.5,zoom*2));
+  expect(camera.getWorldPoint(500,250).x).toBeCloseTo(anchor.x,3);
+  expect(camera.getWorldPoint(500,250).y).toBeCloseTo(anchor.y,3);
+  touch('touchmove',[p(1,340,280),p(2,740,280)]);
+  expect(camera.getWorldPoint(540,280).x).toBeCloseTo(anchor.x,3);
+  expect(camera.getWorldPoint(540,280).y).toBeCloseTo(anchor.y,3);
+  touch('touchmove',[p(1,440,280),p(2,640,280)]);
+  expect(camera.zoom).toBeCloseTo(zoom);
+  expect(camera.getWorldPoint(540,280).x).toBeCloseTo(anchor.x,3);
+  expect(camera.getWorldPoint(540,280).y).toBeCloseTo(anchor.y,3);
+  touch('touchend',[p(2,640,280)]);
+  const scroll=camera.scrollX;
+  touch('touchmove',[p(1,380,280)]);expect(camera.scrollX).toBe(scroll);expect(scene.drag).toBeNull();
+  touch('touchcancel',[]);expect(scene.points.size).toBe(0);expect(scene.last).toBeNull();
+  const gesture=new Event('gesturechange',{cancelable:true});canvas.dispatchEvent(gesture);expect(gesture.defaultPrevented).toBe(true);
+  const resizedZoom=camera.zoom;scene.scale.emit('resize',scene.scale.gameSize,scene.scale.baseSize,scene.scale.displaySize,scene.scale.width,scene.scale.height);expect(camera.zoom).toBe(resizedZoom);
+  const wheel=new WheelEvent('wheel',{deltaY:-50,cancelable:true});
+  camera.setZoom(1);canvas.dispatchEvent(wheel);expect(camera.zoom).toBeCloseTo(1.1);expect(wheel.defaultPrevented).toBe(true);
  }finally{scene.game?.destroy(true);vi.unstubAllGlobals();}
 },10000);

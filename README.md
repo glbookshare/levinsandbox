@@ -49,3 +49,11 @@ Use the header language selector for English or Deutsch. On the first visit, the
 `src/app.test.ts` boots the real Phaser Canvas renderer and Matter physics in a simulated DOM with a native canvas implementation, then clicks all seven HTML toy buttons and checks that each adds and selects an object. It also waits for rendered game frames. Only service-worker registration and storage are mocked in that test. This covers initialization and DOM handler wiring that the smaller physics tests cannot cover. Physical browser and tablet testing is still required.
 
 Game controls are disabled during scene creation and saved-world loading. Lifecycle callbacks and DOM handlers are attached before Phaser starts, so early startup cannot skip button registration or overwrite a new toy with a late save load.
+
+## iPad gestures
+
+On the playground, spread two fingers apart to zoom in, pinch them together to zoom out, and move both fingers together to pan. Lift both fingers before selecting or dragging another toy. The + and − buttons also work by touch. The game handles Safari's native Touch Events with non-passive listeners and suppresses page gestures only on its canvas. Mouse/pen Pointer Events and desktop wheel zoom remain supported. Window resizing no longer resets the chosen zoom.
+
+Automated checks exercise native touch events against the real Phaser camera: pinch in/out, focal-point stability, two-finger pan, cancellation, the transition back to one finger, duplicate touch Pointer Events, and mouse-wheel zoom. These checks simulate Safari's event path; they do not replace a physical iPad test.
+
+For an iPad release check, open the deployed game in Safari and from its Home Screen icon; try pinching both on empty space and over a toy, moving both fingers, lifting one finger first, then starting a new one-finger drag. Confirm that the game zooms rather than the whole page, that a toy does not jump when a finger lifts, and that rotation/backgrounding leaves no stuck drag. After an update, close every open game tab/app window and reopen online to activate the new service worker without clearing saved worlds.
