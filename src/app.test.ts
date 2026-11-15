@@ -37,7 +37,7 @@ it('boots real Phaser, adds toys by mouse and handles Safari touch zoom',async()
   document.querySelector<HTMLButtonElement>('#close-toys')!.click();
   const before=scene.objects.length;
   const buttons=Array.from(document.querySelectorAll<HTMLButtonElement>('[data-kind]'));
-  expect(buttons).toHaveLength(9);
+  expect(buttons).toHaveLength(10);
   buttons.forEach((button,i)=>{
    document.querySelector<HTMLButtonElement>('#toggle-toys')!.click();
    expect(document.querySelector<HTMLElement>('#toy-panel')!.hidden).toBe(false);

@@ -8,7 +8,7 @@ export class BombHold {
  move(pointer:number,x:number,y:number){if(this.active?.pointer===pointer&&Math.hypot(x-this.active.x,y-this.active.y)>12)this.cancel();}
  cancel(){this.active=null;}
  progress(now:number){return this.active?Math.min(1,Math.max(0,(now-this.active.started)/HOLD_MS)):0;}
- tick(now:number){if(!this.active||now-this.active.started<=HOLD_MS)return null;const body=this.active.body;this.cancel();return body;}
+ tick(now:number){if(!this.active||now<=this.active.started+HOLD_MS)return null;const body=this.active.body;this.cancel();return body;}
 }
 export function pushNearby(physics:Phaser.Physics.Matter.MatterPhysics,bodies:MatterJS.BodyType[],x:number,y:number){
  for(const body of bodies){

@@ -24,3 +24,9 @@ it('rejects car saves with missing or corrupt wheel states',()=>{
  expect(()=>decode({...world,items:[car]})).toThrow('Invalid car');
  expect(()=>decode({...world,items:[{...car,parts:[car.parts[0],{...car.parts[0],av:NaN}]}]})).toThrow('Invalid car');
 });
+
+it('round trips dinosaurs and continues to load existing shape-only worlds',()=>{
+ const dinosaur:World={...world,items:[{...world.items[0],kind:'dinosaur'}]};
+ expect(decode(JSON.parse(encode(dinosaur)))).toEqual(dinosaur);
+ expect(decode(JSON.parse(encode(world)))).toEqual(world);
+});

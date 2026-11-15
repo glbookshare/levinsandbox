@@ -1,5 +1,5 @@
 import {t} from './i18n';
-const icons:Record<string,string>={box:'▣',ball:'●',plank:'▬',ramp:'◩',platform:'▰',wheel:'◉',human:'♟',bomb:'✹',car:'🚙'};
+const icons:Record<string,string>={box:'▣',ball:'●',plank:'▬',ramp:'◩',platform:'▰',wheel:'◉',human:'♟',bomb:'✹',car:'🚙',dinosaur:'🦕'};
 export function createUI(){
  document.querySelector('#app')!.innerHTML=`
  <main class="playground" aria-label="Physics playground">

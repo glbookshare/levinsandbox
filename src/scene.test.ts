@@ -12,12 +12,12 @@ beforeEach(()=>{
  vi.stubGlobal('document',{querySelectorAll:()=>[],querySelector:()=>({classList:{toggle:vi.fn()},textContent:'',value:''})});
  scene=new Playground();const engine=Engine.create();
  const add=(b:any)=>{Composite.add(engine.world,b);return b;};
- (scene as any).matter={body:Body,world:{engine,remove:(b:any)=>Composite.remove(engine.world,b),removeConstraint:(j:any)=>Composite.remove(engine.world,j),setGravity:(x:number,y:number)=>{engine.gravity.x=x;engine.gravity.y=y;}},add:{rectangle:(...a:any[])=>add(Bodies.rectangle(...a)),circle:(...a:any[])=>add(Bodies.circle(...a)),fromVertices:(...a:any[])=>add(Bodies.fromVertices(...a)),constraint:(a:any,b:any,length:number,stiffness:number,opts:any)=>add(Constraint.create({...opts,bodyA:a,bodyB:b,length,stiffness}))}};
+ (scene as any).matter={body:Body,world:{engine,add:(b:any)=>Composite.add(engine.world,b),remove:(b:any)=>Composite.remove(engine.world,b),removeConstraint:(j:any)=>Composite.remove(engine.world,j),setGravity:(x:number,y:number)=>{engine.gravity.x=x;engine.gravity.y=y;}},add:{rectangle:(...a:any[])=>add(Bodies.rectangle(...a)),circle:(...a:any[])=>add(Bodies.circle(...a)),fromVertices:(...a:any[])=>add(Bodies.fromVertices(...a)),constraint:(a:any,b:any,length:number,stiffness:number,opts:any)=>add(Constraint.create({...opts,bodyA:a,bodyB:b,length,stiffness}))}};
  (scene as any).cameras={main:{width:800,height:600,getWorldPoint:(x:number,y:number)=>({x,y})}};
 });
 it('adds each tray toy immediately in view and selects it',()=>{
- for(const kind of ['box','ball','plank','ramp','platform','wheel','human','bomb','car'] as Kind[]){const b=scene.addToy(kind)!;expect(b).toBeTruthy();expect(scene.selected).toBe(b);expect(b.position.x).toBeCloseTo(400);expect(b.position.y).toBeCloseTo(210);expect(scene.tool).toBe('select');}
- expect(scene.objects.length).toBe(9);
+ for(const kind of ['box','ball','plank','ramp','platform','wheel','human','bomb','car','dinosaur'] as Kind[]){const b=scene.addToy(kind)!;expect(b).toBeTruthy();expect(scene.selected).toBe(b);expect(b.position.x).toBeCloseTo(400);expect(b.position.y).toBeCloseTo(210);expect(scene.tool).toBe('select');}
+ expect(scene.objects.length).toBe(10);
 });
 it('restores articulated figure poses and removes every joint and body',()=>{
  scene.addToy('human');const human=scene.humans.get(scene.selected!)!;
@@ -100,4 +100,22 @@ it('saves, reloads, rotates and deletes the car together with its wheels',()=>{
 it('counts both car wheels in the physics budget',()=>{
  for(let i=0;i<50;i++)scene.addToy('car');
  expect(scene.objects).toHaveLength(50);expect(scene.addToy('car')).toBeUndefined();
+});
+
+it('keeps the dinosaur as one stable toy and restores its full collision shape',()=>{
+ const dinosaur=scene.spawn('dinosaur',400,200)!;
+ expect(dinosaur.parts).toHaveLength(8);
+ const bottom=dinosaur.bounds.max.y;
+ const floor=scene.matter.add.rectangle(400,bottom+20,1000,40,{isStatic:true});
+ for(let i=0;i<300;i++)Engine.update(scene.matter.world.engine,1000/60);
+ expect(Math.abs(dinosaur.angle)).toBeLessThan(.1);
+ expect(dinosaur.parts[5].position.y).toBeLessThan(dinosaur.parts[1].position.y-70);
+ scene.matter.world.remove(floor);
+ scene.selected=dinosaur;scene.turnSelected(.4);Body.setVelocity(dinosaur,{x:2,y:-1});
+ const saved=decode(JSON.parse(encode(scene.snapshot())));scene.restore(saved);
+ const restored=scene.snapshot();
+ expect(restored.items[0].av).toBeCloseTo(saved.items[0].av,12);
+ expect({...restored.items[0],av:0}).toEqual({...saved.items[0],av:0});expect(scene.objects[0].body.parts).toHaveLength(8);
+ scene.selected=scene.objects[0].body;scene.removeSelected();
+ expect(Composite.allBodies(scene.matter.world.engine.world)).toHaveLength(0);
 });

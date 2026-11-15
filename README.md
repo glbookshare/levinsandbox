@@ -46,7 +46,7 @@ Open the floating **Settings** panel and use the language selector for English o
 
 ## Startup regression check
 
-`src/app.test.ts` boots the real Phaser Canvas renderer and Matter physics in a simulated DOM with a native canvas implementation, then clicks all nine HTML toy buttons and checks that each adds and selects an object. It also waits for rendered game frames. Only service-worker registration and storage are mocked in that test. This covers initialization and DOM handler wiring that the smaller physics tests cannot cover. Physical browser and tablet testing is still required.
+`src/app.test.ts` boots the real Phaser Canvas renderer and Matter physics in a simulated DOM with a native canvas implementation, then clicks all ten HTML toy buttons and checks that each adds and selects an object. It also waits for rendered game frames. Only service-worker registration and storage are mocked in that test. This covers initialization and DOM handler wiring that the smaller physics tests cannot cover. Physical browser and tablet testing is still required.
 
 Game controls are disabled during scene creation and saved-world loading. Lifecycle callbacks and DOM handlers are attached before Phaser starts, so early startup cannot skip button registration or overwrite a new toy with a late save load.
 
@@ -78,3 +78,7 @@ The bomb pops once and disappears, producing a brief confetti effect and a bound
 ## Big car
 
 Choose **Toys → Big car** (German: **Spielzeuge → Großes Auto**) to add a large blue toy car. Its 220px chassis and two 60px wheels are three dynamic Matter bodies connected by two free-turning axles. Push or drag it to move it, or place it on a ramp and let gravity roll it downhill. There is no motor or driving control yet. Selecting either wheel selects the entire car; paused placement, rotation, deletion, confetti impulses and returning from outside the world include both wheels. Saving retains the chassis and each wheel’s position, angle and velocities and reconstructs the axles when loading.
+
+## Dinosaur
+
+Choose **Toys → Dinosaur** (German: **Spielzeuge → Dinosaurier**) for a friendly green long-necked dinosaur with a smiling face and yellow back plates. It is one solid dynamic toy, with seven connected collision shapes for its belly, feet, neck, head, muzzle and tail. It stands on a flat floor, interacts with other toys and confetti impulses, and supports selection, dragging, rotation, deletion and saved-world restoration. It uses seven units of the physics complexity budget and adds no walking animations, attacks or injury mechanics.
