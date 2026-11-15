@@ -37,7 +37,7 @@ it('boots real Phaser, adds toys by mouse and handles Safari touch zoom',async()
   document.querySelector<HTMLButtonElement>('#close-toys')!.click();
   const before=scene.objects.length;
   const buttons=Array.from(document.querySelectorAll<HTMLButtonElement>('[data-kind]'));
-  expect(buttons).toHaveLength(8);
+  expect(buttons).toHaveLength(9);
   buttons.forEach((button,i)=>{
    document.querySelector<HTMLButtonElement>('#toggle-toys')!.click();
    expect(document.querySelector<HTMLElement>('#toy-panel')!.hidden).toBe(false);
@@ -57,7 +57,7 @@ it('boots real Phaser, adds toys by mouse and handles Safari touch zoom',async()
   expect([scene.cameras.main.width,scene.cameras.main.height]).toEqual(cameraSize);
   language.value='en';language.dispatchEvent(new Event('change'));
   expect(scene.objects.length).toBe(objectCount);expect(scene.cameras.main.zoom).toBe(zoomBefore);
-  expect(scene.humans.size).toBe(1);
+  expect(scene.humans.size).toBe(1);expect(scene.cars.size).toBe(1);
   await vi.waitFor(()=>{expect(errors).toEqual([]);expect(scene.game.loop.frame).toBeGreaterThan(4);});
 
   // iPad/Safari emits native Touch Events; exercise the actual registered DOM listeners.
@@ -116,7 +116,7 @@ it('boots real Phaser, adds toys by mouse and handles Safari touch zoom',async()
   const countBeforePop=scene.objects.length;
   scene.updateBombs(performance.now());
   expect(scene.objects.some(o=>o.body===bomb)).toBe(false);
-  expect(scene.objects.length).toBe(countBeforePop-1);expect(scene.humans.size).toBe(1);
+  expect(scene.objects.length).toBe(countBeforePop-1);expect(scene.humans.size).toBe(1);expect(scene.cars.size).toBe(1);
   expect(scene.pops).toHaveLength(1);expect(scene.bombHold.active).toBeNull();
   touch('touchend',[p(9,300,200)]);
   scene.update();expect(errors).toEqual([]);

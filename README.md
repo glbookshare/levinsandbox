@@ -24,7 +24,7 @@ After the first online visit finishes precaching, the game works offline. Servic
 
 Tap any toy button to immediately add that object near the top-center of the current view. The new toy is selected automatically; drag it to place it. Select mode lets you tap and drag toys. Pause allows precise placement; the rotation handle above a selection turns it, and the rotate button turns by 15°. Two fingers pan and pinch to zoom; the pan tool, zoom buttons and wheel also work on desktop. Platforms stay fixed. Reset restores the starter scene. Gravity offers Earth, Moon, Float and Jupiter settings. Backgrounding pauses simulation and requests a checkpoint; returning respects the chosen pause state.
 
-The scene caps physics bodies at 150 (a human uses six bodies), enables Matter sleeping, limits zoom, and uses simple procedural artwork with no downloaded images. A single playground is saved with debouncing and ten-second checkpoints. An IndexedDB transaction replaces a validated snapshot atomically, preserving the prior record if a write fails. Browser shutdown can still lose changes since the last successful checkpoint. Storage errors are shown in the interface.
+The scene caps physics bodies at 150 (a human uses six bodies and a car uses three), enables Matter sleeping, limits zoom, and uses simple procedural artwork with no downloaded images. A single playground is saved with debouncing and ten-second checkpoints. An IndexedDB transaction replaces a validated snapshot atomically, preserving the prior record if a write fails. Browser shutdown can still lose changes since the last successful checkpoint. Storage errors are shown in the interface.
 
 ## Architecture and next phases
 
@@ -46,7 +46,7 @@ Open the floating **Settings** panel and use the language selector for English o
 
 ## Startup regression check
 
-`src/app.test.ts` boots the real Phaser Canvas renderer and Matter physics in a simulated DOM with a native canvas implementation, then clicks all eight HTML toy buttons and checks that each adds and selects an object. It also waits for rendered game frames. Only service-worker registration and storage are mocked in that test. This covers initialization and DOM handler wiring that the smaller physics tests cannot cover. Physical browser and tablet testing is still required.
+`src/app.test.ts` boots the real Phaser Canvas renderer and Matter physics in a simulated DOM with a native canvas implementation, then clicks all nine HTML toy buttons and checks that each adds and selects an object. It also waits for rendered game frames. Only service-worker registration and storage are mocked in that test. This covers initialization and DOM handler wiring that the smaller physics tests cannot cover. Physical browser and tablet testing is still required.
 
 Game controls are disabled during scene creation and saved-world loading. Lifecycle callbacks and DOM handlers are attached before Phaser starts, so early startup cannot skip button registration or overwrite a new toy with a late save load.
 
@@ -74,3 +74,7 @@ Panels scroll on smaller screens, while unused overlay space lets touches pass t
 The toy palette includes a colorful confetti bomb (Konfettibombe). Hold it still with one finger or the mouse for **more than three seconds**. A progress ring fills as you hold. Releasing, dragging more than 12 screen pixels, adding a second finger, opening an overlay, losing focus, backgrounding, deleting or resetting cancels the hold. Short taps never accumulate.
 
 The bomb pops once and disappears, producing a brief confetti effect and a bounded, distance- and mass-dependent impulse on nearby dynamic objects. Static platforms stay fixed, friendly figures remain intact, and other bombs do not trigger automatically. In Pause mode the pop works, but pushed toys move when physics resumes. The effect adds no physics bodies, and at most four visual pops are kept at once. Bombs and post-pop velocities are saved normally; an in-progress finger hold is never saved or resumed.
+
+## Big car
+
+Choose **Toys → Big car** (German: **Spielzeuge → Großes Auto**) to add a large blue toy car. Its 220px chassis and two 60px wheels are three dynamic Matter bodies connected by two free-turning axles. Push or drag it to move it, or place it on a ramp and let gravity roll it downhill. There is no motor or driving control yet. Selecting either wheel selects the entire car; paused placement, rotation, deletion, confetti impulses and returning from outside the world include both wheels. Saving retains the chassis and each wheel’s position, angle and velocities and reconstructs the axles when loading.

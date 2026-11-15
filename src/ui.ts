@@ -1,5 +1,5 @@
 import {t} from './i18n';
-const icons:Record<string,string>={box:'▣',ball:'●',plank:'▬',ramp:'◩',platform:'▰',wheel:'◉',human:'♟',bomb:'✹'};
+const icons:Record<string,string>={box:'▣',ball:'●',plank:'▬',ramp:'◩',platform:'▰',wheel:'◉',human:'♟',bomb:'✹',car:'🚙'};
 export function createUI(){
  document.querySelector('#app')!.innerHTML=`
  <main class="playground" aria-label="Physics playground">
@@ -15,7 +15,7 @@ export function createUI(){
    </div>
    <section id="toy-panel" class="panel glass" data-hud aria-labelledby="toy-heading" hidden>
     <div class="panel-heading"><h2 id="toy-heading">TOY BOX</h2><button id="close-toys" class="icon-button" aria-label="Close toy box">×</button></div>
-    <div class="toys">${Object.entries(icons).map(([kind,icon])=>`<button class="toy ${kind}" data-kind="${kind}"><span aria-hidden="true">${icon}</span><b>${kind==='bomb'?'Confetti bomb':kind[0].toUpperCase()+kind.slice(1)}</b></button>`).join('')}</div>
+    <div class="toys">${Object.entries(icons).map(([kind,icon])=>`<button class="toy ${kind}" data-kind="${kind}"><span aria-hidden="true">${icon}</span><b>${kind==='car'?'Big car':kind==='bomb'?'Confetti bomb':kind[0].toUpperCase()+kind.slice(1)}</b></button>`).join('')}</div>
    </section>
    <section id="settings-panel" class="panel glass" data-hud aria-labelledby="settings-heading" hidden>
     <div class="panel-heading"><h2 id="settings-heading">Settings</h2><button id="close-settings" class="icon-button" aria-label="Close settings">×</button></div>

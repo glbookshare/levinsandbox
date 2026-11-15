@@ -18,3 +18,9 @@ it('round trips toy bombs without persisting a pending long press',()=>{
  const w:World={...world,items:[{...world.items[0],kind:'bomb'}]};
  expect(decode(JSON.parse(encode(w)))).toEqual(w);
 });
+
+it('rejects car saves with missing or corrupt wheel states',()=>{
+ const car={...world.items[0],kind:'car',parts:[{x:1,y:2,angle:0,vx:0,vy:0,av:0}]};
+ expect(()=>decode({...world,items:[car]})).toThrow('Invalid car');
+ expect(()=>decode({...world,items:[{...car,parts:[car.parts[0],{...car.parts[0],av:NaN}]}]})).toThrow('Invalid car');
+});

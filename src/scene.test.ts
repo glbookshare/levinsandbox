@@ -16,8 +16,8 @@ beforeEach(()=>{
  (scene as any).cameras={main:{width:800,height:600,getWorldPoint:(x:number,y:number)=>({x,y})}};
 });
 it('adds each tray toy immediately in view and selects it',()=>{
- for(const kind of ['box','ball','plank','ramp','platform','wheel','human','bomb'] as Kind[]){const b=scene.addToy(kind)!;expect(b).toBeTruthy();expect(scene.selected).toBe(b);expect(b.position.x).toBeCloseTo(400);expect(b.position.y).toBeCloseTo(210);expect(scene.tool).toBe('select');}
- expect(scene.objects.length).toBe(8);
+ for(const kind of ['box','ball','plank','ramp','platform','wheel','human','bomb','car'] as Kind[]){const b=scene.addToy(kind)!;expect(b).toBeTruthy();expect(scene.selected).toBe(b);expect(b.position.x).toBeCloseTo(400);expect(b.position.y).toBeCloseTo(210);expect(scene.tool).toBe('select');}
+ expect(scene.objects.length).toBe(9);
 });
 it('restores articulated figure poses and removes every joint and body',()=>{
  scene.addToy('human');const human=scene.humans.get(scene.selected!)!;
@@ -71,4 +71,33 @@ it('reconstructs pose attachments correctly for a rotated saved figure',()=>{
  for(let i=0;i<60;i++)Engine.update(scene.matter.world.engine,1000/60);
  expect(scene.objects[0].body.angle).toBeCloseTo(.7,1);
  scene.humans.get(scene.objects[0].body)!.parts.forEach((b,i)=>{expect(Math.abs(b.angle-saved.items[0].parts![i].angle)).toBeLessThan(.1);});
+});
+
+it('rolls the big car downhill with freely rotating wheels and connected axles',()=>{
+ const chassis=scene.spawn('car',400,180)!;
+ const car=scene.cars.get(chassis)!;
+ expect(car.parts).toHaveLength(2);expect(car.joints).toHaveLength(2);
+ const ramp=scene.matter.add.rectangle(450,350,1400,20,{isStatic:true,friction:.85});
+ Body.setAngle(ramp,.12);
+ for(let i=0;i<180;i++)Engine.update(scene.matter.world.engine,1000/60);
+ expect(chassis.position.x).toBeGreaterThan(420);
+ car.parts.forEach((wheel,i)=>{
+  expect(Math.abs(wheel.angle)).toBeGreaterThan(.2);
+  const x=i===0?-72:72,y=36;
+  const axle={x:chassis.position.x+x*Math.cos(chassis.angle)-y*Math.sin(chassis.angle),y:chassis.position.y+x*Math.sin(chassis.angle)+y*Math.cos(chassis.angle)};
+  expect(Math.hypot(wheel.position.x-axle.x,wheel.position.y-axle.y)).toBeLessThan(5);
+ });
+});
+it('saves, reloads, rotates and deletes the car together with its wheels',()=>{
+ const chassis=scene.spawn('car',400,180)!;
+ scene.selected=chassis;scene.turnSelected(.6);
+ const car=scene.cars.get(chassis)!;Body.setAngularVelocity(car.parts[0],.3);Body.setVelocity(chassis,{x:2,y:1});
+ const saved=decode(JSON.parse(encode(scene.snapshot())));scene.restore(saved);
+ expect(scene.snapshot()).toEqual(saved);expect(scene.cars.size).toBe(1);
+ scene.selected=scene.objects[0].body;scene.removeSelected();
+ expect(scene.cars.size).toBe(0);expect(Composite.allBodies(scene.matter.world.engine.world)).toHaveLength(0);expect(Composite.allConstraints(scene.matter.world.engine.world)).toHaveLength(0);
+});
+it('counts both car wheels in the physics budget',()=>{
+ for(let i=0;i<50;i++)scene.addToy('car');
+ expect(scene.objects).toHaveLength(50);expect(scene.addToy('car')).toBeUndefined();
 });
